@@ -260,6 +260,7 @@ const Q=[
 ];
 const VERSION='ail-platform-v1',TIME_LIMIT=20000,CRIT_MS=7000,MAX_HP=100,MAX_VB=150;
 const COLS=['ReceivedAt','EventID','SessionID','PlayerID','Sequence','EventType','GameVersion','Round','QuestionID','SourcePage','SourceQuestionNo','SelectedOption','CorrectOption','IsCorrect','ResponseMs','ElapsedMs','PlayerHP','BossHP','DamageToPlayer','DamageToBoss','Score','CorrectCount','Ending','RequestHash','ResponseJSON'];
+const COLS_ZH=['接收時間','事件編號','場次編號','玩家名稱','順序','事件類型','遊戲版本','關卡','題目編號','題目頁碼','題目題號','選擇答案','正確答案','是否答對','作答耗時(毫秒)','經過時間(毫秒)','玩家血量','BOSS血量','玩家受到的傷害','BOSS受到的傷害','分數','答對題數','結束方式','請求雜湊值','回應資料JSON'];
 
 const $=id=>document.getElementById(id);
 const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -378,7 +379,7 @@ function abandon(reason){if(!S||S.ended||!ACTIVE.includes(G.mode))return false;S
 addEventListener('pagehide',()=>{abandon('pagehide');CLOUD.beacon()});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden'){XL.flush();CLOUD.flush()}});
 const csvCell=v=>{v=String(v??'');return /[",\n]/.test(v)?'"'+v.replace(/"/g,'""')+'"':v};
-const toCSV=rows=>[COLS.join(','),...rows.map(r=>COLS.map(c=>csvCell(r[c])).join(','))].join('\r\n');
+const toCSV=rows=>[COLS_ZH.join(','),...rows.map(r=>COLS.map(c=>csvCell(r[c])).join(','))].join('\r\n');
 
 // ================= Excel 連動：直接寫入 02_遊玩紀錄欄位.xlsx =================
 // 只改工作表 XML 的 sheetData，保留原本的標題樣式、欄寬與凍結窗格。
@@ -653,7 +654,7 @@ $('quitBtn').onclick=e=>{const b=e.currentTarget;if(b.dataset.confirm!=='1'){b.d
 $('xlBtn').onclick=()=>XL.pick();$('xlRetry').onclick=async()=>{if(await XL.ensure())XL.flush()};
 $('againBtn').onclick=()=>{$('resultCard').hidden=true;$('startCard').hidden=false;L=buildLevel();G.mode='title';G.lit=false;G.fireworks=0;G.parts=[];G.pops=[];$('alias').focus()};
 $('csvBtn').onclick=()=>{const rows=events.filter(r=>r.SessionID===S.session);try{const blob=new Blob(['﻿'+toCSV(rows)],{type:'text/csv'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='遊玩紀錄_'+S.alias+'.csv';document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}catch{toast('這個環境不允許下載，請改用「複製紀錄」')}};
-$('copyBtn').onclick=()=>{const rows=events.filter(r=>r.SessionID===S.session),text=[COLS.join('\t'),...rows.map(r=>COLS.map(c=>String(r[c]??'')).join('\t'))].join('\n');
+$('copyBtn').onclick=()=>{const rows=events.filter(r=>r.SessionID===S.session),text=[COLS_ZH.join('\t'),...rows.map(r=>COLS.map(c=>String(r[c]??'')).join('\t'))].join('\n');
   navigator.clipboard.writeText(text).then(()=>toast('已複製 '+rows.length+' 筆紀錄，可直接貼到 Excel')).catch(()=>toast('瀏覽器拒絕複製，請改用下載 CSV'))};
 $('soundBtn').onclick=e=>{soundOn=!soundOn;e.currentTarget.setAttribute('aria-pressed',soundOn);e.currentTarget.textContent='音效 '+(soundOn?'開':'關');soundOn&&G.mode==='play'?MUSIC.start():MUSIC.stop()};
 $('musicBtn').onclick=e=>{musicOn=!musicOn;e.currentTarget.setAttribute('aria-pressed',musicOn);e.currentTarget.textContent='音樂 '+(musicOn?'開':'關');musicOn&&G.mode==='play'?MUSIC.start():MUSIC.stop()};
